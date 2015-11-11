@@ -1,24 +1,20 @@
 package org.equ.smsgateway;
 
-
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
-import android.app.Activity;
+import android.telephony.SmsManager;
 
 import fi.iki.elonen.NanoHTTPD;
 
 import java.util.Map;
 import java.util.logging.Logger;
-//import java.util.Properties;
 
 
 public class WebServer extends NanoHTTPD{
 
     private static final Logger LOG = Logger.getLogger(WebServer.class.getName());
-    private static final String SEND_SMS_INTENT = "org.equ.send_sms";
-    LocalBroadcastManager mBroadcastMgr;
-    Context context;
+    private Context context;
 
     public WebServer(Context context, int port) {
         super(port);
@@ -31,20 +27,23 @@ public class WebServer extends NanoHTTPD{
         String uri = session.getUri();
         WebServer.LOG.info(method + " '" + uri + "' ");
 
-        String msg = "<html><body><h1>Hello server</h1>\n";
-        mBroadcastMgr = LocalBroadcastManager                   //TEMP
-                .getInstance(context);
-        mBroadcastMgr.sendBroadcast(new Intent(SEND_SMS_INTENT));
 
-        /*Map<String, String> parms = session.getParms();
-        if (parms.get("username") == null) {
-            msg += "<form action='?' method='get'>\n" + "  <p>Your name: <input type='text' name='username'></p>\n" + "</form>\n";
+        Map<String, String> params = session.getParms();
+        if (params != null && params.get("num") != null && params.get("msg") != null
+                && !params.get("msg").equals("")) {
+            //send sms
+            String userNum = params.get("num");
+            String userNotif = params.get("msg");
+            String intent = "android.telephony.SmsManager.STATUS_ON_ICC_SENT";
+            PendingIntent piSent = PendingIntent.getBroadcast(context, 0, new Intent(intent), 0);
+
+            SmsManager sms = SmsManager.getDefault();
+            sms.sendTextMessage(userNum, null, userNotif, piSent, null);
+            String msg = "accepted";
+            return new Response(Response.Status.OK, MIME_HTML, msg);
         } else {
-            msg += "<p>Hello, " + parms.get("username") + "!</p>";
-        }*/
-
-        msg += "</body></html>\n";
-
-        return new Response(Response.Status.OK, MIME_HTML, msg);
+            String msg = "<html><body>No num and msg parameters provided!</body></html>";  //for testing
+            return new Response(Response.Status.NO_CONTENT, MIME_HTML, msg);
+        }
     }
 }

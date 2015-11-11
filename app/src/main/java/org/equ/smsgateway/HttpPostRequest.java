@@ -27,11 +27,9 @@ public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
     private final String TAG = "POST Request";
     private final String HOST = "localhost";
     private final String PORT = "4444";
+    private final String THIS_SIM_NUM = "+380734757601";
 
-    public HttpPostRequest (SmsMessage msg){
-        this.msg = msg;
-    }
-
+    public HttpPostRequest (SmsMessage msg) { this.msg = msg; }
 
 
     @Override
@@ -39,18 +37,23 @@ public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
         try {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost request = new HttpPost("http://" + HOST + ":" + PORT);
+
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("num", msg.getOriginatingAddress()));
+            params.add(new BasicNameValuePair("sn", THIS_SIM_NUM));
+            params.add(new BasicNameValuePair("num", Integer.toString(msg.getIndexOnIcc())));
             params.add(new BasicNameValuePair("msg", msg.getMessageBody()));
-            UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params, HTTP.UTF_8);
-            request.setEntity(ent);
+            UrlEncodedFormEntity encoded = new UrlEncodedFormEntity(params, HTTP.UTF_8);
+            request.setEntity(encoded);
             Log.i(TAG, "Formed");
             HttpResponse responsePOST = httpClient.execute(request);
             Log.i(TAG, "Sent");
 
             HttpEntity resEntity = responsePOST.getEntity();
-            if (resEntity != null)
+            if (resEntity != null) {
+                //TODO proceed response here
                 Log.i(TAG, "RESPONSE" + EntityUtils.toString(resEntity));
+            }
         }
         catch (Exception e) {
             e.printStackTrace();

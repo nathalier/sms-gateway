@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +27,7 @@ public class MainActivity extends Activity {
     private static final int PORT = 6717;
     private final IntentFilter intentFilter = new IntentFilter(SEND_SMS_INTENT);
     private final QueuePositionReceiver receiver = new QueuePositionReceiver();
+    private String mySimNum;
 
     private LocalBroadcastManager mBroadcastMgr;  //TEMP
     private WebServer server;
@@ -55,13 +57,22 @@ public class MainActivity extends Activity {
         super.onResume();
         // registerReceiver(receiver, intentFilter);  //TODO
 
+        //getting this phone SIMnumber - NOT USED
+/*        TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        mySimNum = telephMng.getLine1Number();
+        if (mySimNum == null) mySimNum = telephMng.getSimSerialNumber();*/
+
         TextView textIpaddr = (TextView) findViewById(R.id.ipaddr);
-        /*WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+
+        // Getting WiFi device IP
+        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
 
         final String formatedIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
-                (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));*/
-        String formatedIpAddress = "0000";
+                (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
+
+        // Getting device IP
+        /*final String formatedIpAddress = "0000";
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                 NetworkInterface intf = en.nextElement();
@@ -74,7 +85,8 @@ public class MainActivity extends Activity {
             }
         } catch (SocketException e) {
             // Log.e(Constants.LOG_TAG, e.getMessage(), e);
-        }
+        }*/
+
         textIpaddr.setText("Please access http://" + formatedIpAddress + ":" + PORT);
 
         server = new WebServer(context, PORT);
@@ -93,4 +105,5 @@ public class MainActivity extends Activity {
         if (server != null) server.stop();
         super.onDestroy();
     }
+
 }
