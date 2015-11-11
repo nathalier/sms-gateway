@@ -24,16 +24,12 @@ import android.util.Log;
 
 public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
     private SmsMessage msg;
-//    private String httpReq;
     private final String TAG = "POST Request";
     private final String HOST = "localhost";
     private final String PORT = "4444";
 
     public HttpPostRequest (SmsMessage msg){
-//        if (!validate(msg)) return;
         this.msg = msg;
-//        formPostRequest();
-//        doInBackground();
     }
 
 
@@ -43,7 +39,7 @@ public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
         try {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost request = new HttpPost("http://" + HOST + ":" + PORT);
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("num", msg.getOriginatingAddress()));
             params.add(new BasicNameValuePair("msg", msg.getMessageBody()));
             UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params, HTTP.UTF_8);

@@ -7,15 +7,16 @@
 
     <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView" />
+        android:id="@+id/ipaddr" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="GenIntent"
         android:id="@+id/button"
-        android:layout_marginTop="47dp"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/ipaddr"
+        android:layout_toRightOf="@+id/ipaddr"
+        android:layout_toEndOf="@+id/ipaddr"
+        android:layout_marginTop="38dp" />
 
 </RelativeLayout>
