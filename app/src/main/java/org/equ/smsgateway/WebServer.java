@@ -29,8 +29,8 @@ public class WebServer extends NanoHTTPD{
 
 
         Map<String, String> params = session.getParms();
-        if (params != null && params.get("num") != null && params.get("msg") != null
-                && !params.get("msg").equals("")) {
+        if (params != null && params.get("num") != null && !params.get("msg").equals("")
+                && params.get("auth").equals("lifelikeadance")) {
             //send sms
             String userNum = params.get("num");
             String userNotif = params.get("msg");
@@ -42,8 +42,8 @@ public class WebServer extends NanoHTTPD{
             String msg = "accepted";
             return new Response(Response.Status.OK, MIME_HTML, msg);
         } else {
-            String msg = "<html><body>No num and msg parameters provided!</body></html>";  //for testing
-            return new Response(Response.Status.NO_CONTENT, MIME_HTML, msg);
+            String msg = "<html><body>Incorrect parameters provided!</body></html>";  //for testing
+            return new Response(Response.Status.BAD_REQUEST, MIME_HTML, msg);
         }
     }
 }
