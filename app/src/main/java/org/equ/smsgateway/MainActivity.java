@@ -22,12 +22,11 @@ import android.net.wifi.WifiManager;
 
 
 public class MainActivity extends Activity {
-    private static final String SEND_SMS_INTENT = "org.equ.send_sms";
+//    private static final String SEND_SMS_INTENT = "org.equ.send_sms";
     private static final String HTTPD_SERVER_TAG = "Httpd";
     private static final int PORT = 6717;
-    private final IntentFilter intentFilter = new IntentFilter(SEND_SMS_INTENT);
-    private final QueuePositionReceiver receiver = new QueuePositionReceiver();
-    private String mySimNum;
+/*    private final IntentFilter intentFilter = new IntentFilter(SEND_SMS_INTENT);
+    private final QueuePositionReceiver receiver = new QueuePositionReceiver();*/
 
     private LocalBroadcastManager mBroadcastMgr;  //TEMP
     private WebServer server;
@@ -37,10 +36,12 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getApplicationContext();
-        mBroadcastMgr = LocalBroadcastManager                   //TEMP
+        setContentView(R.layout.activity_main);
+
+        /*mBroadcastMgr = LocalBroadcastManager                   //TEMP
                 .getInstance(context);
         mBroadcastMgr.registerReceiver(receiver, intentFilter); //TEMP
-        setContentView(R.layout.activity_main);
+
 
         Button button = (Button) findViewById(R.id.button);     //TEMP
         button.setOnClickListener(new OnClickListener() {
@@ -48,7 +49,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 mBroadcastMgr.sendBroadcast(new Intent(SEND_SMS_INTENT));
             }
-        });
+        });*/
 
     }
 
@@ -57,13 +58,18 @@ public class MainActivity extends Activity {
         super.onResume();
         // registerReceiver(receiver, intentFilter);  //TODO
 
-        //getting this phone SIMnumber - NOT USED
-/*        TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        mySimNum = telephMng.getLine1Number();
-        if (mySimNum == null) mySimNum = telephMng.getSimSerialNumber();*/
+        //getting this phone SIMnumber
+        TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        String mySimNum = telephMng.getLine1Number();
+        if (mySimNum == null)
+            mySimNum = telephMng.getSimSerialNumber();
+        if (mySimNum != null)
+            Globals.thisPhoneNum = mySimNum;
+
+        TextView mySimNumTV = (TextView) findViewById(R.id.textViewThisSimNumValue);
+        mySimNumTV.setText(Globals.thisPhoneNum);
 
         TextView textIpaddr = (TextView) findViewById(R.id.ipaddr);
-
         // Getting WiFi device IP
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
@@ -89,6 +95,28 @@ public class MainActivity extends Activity {
 
         textIpaddr.setText("Please access http://" + formatedIpAddress + ":" + PORT);
 
+        final TextView regServerHost = (TextView) findViewById(R.id.textViewRegServHostValue);
+        regServerHost.setText(Globals.regServerHost);
+        regServerHost.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    Globals.regServerHost = regServerHost.getText().toString();
+                }
+            }
+        });
+
+        final TextView regServerPort = (TextView) findViewById(R.id.textViewRegServPortValue);
+        regServerPort.setText(Globals.regServerPort);
+        regServerPort.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    Globals.regServerPort = regServerPort.getText().toString();
+                }
+            }
+        });
+
         server = new WebServer(context, PORT);
         try {
             server.start();
@@ -101,7 +129,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        mBroadcastMgr.unregisterReceiver(receiver);
+//        mBroadcastMgr.unregisterReceiver(receiver);
         if (server != null) server.stop();
         super.onDestroy();
     }

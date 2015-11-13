@@ -25,22 +25,18 @@ import android.util.Log;
 public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
     private SmsMessage msg;
     private final String TAG = "POST Request";
-    private final String HOST = "localhost";
-    private final String PORT = "4444";
-    private final String THIS_SIM_NUM = "+380734757601";
 
     public HttpPostRequest (SmsMessage msg) { this.msg = msg; }
-
 
     @Override
     protected Void doInBackground(Void... noth){
         try {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost request = new HttpPost("http://" + HOST + ":" + PORT);
-
+            HttpPost request = new HttpPost("http://" + Globals.regServerHost + ":"
+                                                      + Globals.regServerPort);
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("num", msg.getOriginatingAddress()));
-            params.add(new BasicNameValuePair("sn", THIS_SIM_NUM));
+            params.add(new BasicNameValuePair("sn", Globals.thisPhoneNum));
             params.add(new BasicNameValuePair("num", Integer.toString(msg.getIndexOnIcc())));
             params.add(new BasicNameValuePair("msg", msg.getMessageBody()));
             UrlEncodedFormEntity encoded = new UrlEncodedFormEntity(params, HTTP.UTF_8);

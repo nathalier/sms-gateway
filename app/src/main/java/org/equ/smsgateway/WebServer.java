@@ -42,7 +42,7 @@ public class WebServer extends NanoHTTPD{
             String msg = "accepted";
             return new Response(Response.Status.OK, MIME_HTML, msg);
         } else {
-            String msg = "<html><body>Incorrect parameters provided!</body></html>";  //for testing
+            String msg = "<html><body>Incorrect parameters provided!</body></html>";
             return new Response(Response.Status.BAD_REQUEST, MIME_HTML, msg);
         }
     }
