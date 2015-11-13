@@ -13,10 +13,13 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.net.wifi.WifiManager;
 
@@ -50,24 +53,28 @@ public class MainActivity extends Activity {
                 mBroadcastMgr.sendBroadcast(new Intent(SEND_SMS_INTENT));
             }
         });*/
+        if (savedInstanceState == null) {
+            TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String mySimNum = telephMng.getLine1Number();
+            if (mySimNum != null && !mySimNum.equals(""))
+                Globals.thisPhoneNum = mySimNum;
+        }
 
-    }
+        final EditText mySimNumET = (EditText) findViewById(R.id.editTextThisTelephNum);
+//        TextView mySimNumTV = (TextView) findViewById(R.id.textViewThisSimNumValue);
+        mySimNumET.setText(Globals.thisPhoneNum);
+        mySimNumET.addTextChangedListener(new TextWatcher() {
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // registerReceiver(receiver, intentFilter);  //TODO
+            public void afterTextChanged(Editable s) {
+                Globals.thisPhoneNum = mySimNumET.getText().toString();
+            }
 
-        //getting this phone SIMnumber
-        TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String mySimNum = telephMng.getLine1Number();
-        if (mySimNum == null)
-            mySimNum = telephMng.getSimSerialNumber();
-        if (mySimNum != null)
-            Globals.thisPhoneNum = mySimNum;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-        TextView mySimNumTV = (TextView) findViewById(R.id.textViewThisSimNumValue);
-        mySimNumTV.setText(Globals.thisPhoneNum);
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+        });
 
         TextView textIpaddr = (TextView) findViewById(R.id.ipaddr);
         // Getting WiFi device IP
@@ -95,26 +102,30 @@ public class MainActivity extends Activity {
 
         textIpaddr.setText("Please access http://" + formatedIpAddress + ":" + PORT);
 
-        final TextView regServerHost = (TextView) findViewById(R.id.textViewRegServHostValue);
+        final EditText regServerHost = (EditText) findViewById(R.id.editTextRegServerHostValue);
         regServerHost.setText(Globals.regServerHost);
-        regServerHost.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        regServerHost.addTextChangedListener(new TextWatcher() {
 
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
+            public void afterTextChanged(Editable s) {
                     Globals.regServerHost = regServerHost.getText().toString();
-                }
             }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
-        final TextView regServerPort = (TextView) findViewById(R.id.textViewRegServPortValue);
+        final EditText regServerPort = (EditText) findViewById(R.id.editTextRegServerPortValue);
         regServerPort.setText(Globals.regServerPort);
-        regServerPort.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        regServerPort.addTextChangedListener(new TextWatcher() {
 
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
+            public void afterTextChanged(Editable s) {
                     Globals.regServerPort = regServerPort.getText().toString();
-                }
             }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
         server = new WebServer(context, PORT);
@@ -125,6 +136,16 @@ public class MainActivity extends Activity {
             Log.w(HTTPD_SERVER_TAG, "The server could not start.");
         }
         Log.w(HTTPD_SERVER_TAG, "Web server initialized.");
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // registerReceiver(receiver, intentFilter);  //TODO
+
+        //getting this phone SIMnumber
+
     }
 
     @Override
@@ -132,6 +153,15 @@ public class MainActivity extends Activity {
 //        mBroadcastMgr.unregisterReceiver(receiver);
         if (server != null) server.stop();
         super.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // TODO:
+        // Save state information with a collection of key-value pairs
+        // 4 lines of code, one for every count variable
+        savedInstanceState.putString("simNum", Globals.thisPhoneNum);
+
     }
 
 }

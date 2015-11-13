@@ -42,6 +42,8 @@ public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
             UrlEncodedFormEntity encoded = new UrlEncodedFormEntity(params, HTTP.UTF_8);
             request.setEntity(encoded);
             Log.i(TAG, "Formed");
+
+
             HttpResponse responsePOST = httpClient.execute(request);
             Log.i(TAG, "Sent");
 
