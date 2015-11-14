@@ -25,10 +25,10 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 
-public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
+public class HttpPostRequest extends AsyncTask<Void, Void, Boolean> {
     private SmsMessage msg;
     private int tries;
-    private final int TRIES_LIMIT = 3;
+    private final int TRIES_LIMIT = 5;
     private final int TRIES_INTERVAL = 1000;
     private final int STATUS_OK = 200;
     private final String TAG = "POST Request";
@@ -46,7 +46,7 @@ public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... noth){
+    protected Boolean doInBackground(Void... noth){
         try {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost request = new HttpPost("http://" + Globals.regServerHost + ":"
@@ -79,7 +79,7 @@ public class HttpPostRequest extends AsyncTask<Void, Void, Void> {
 //            Handler handler = new Handler();
 //            handler.postDelayed(new RegRetry(msg, ++tries), TRIES_INTERVAL);
         }
-        return null;
+        return success;
     }
 
 }

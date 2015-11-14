@@ -3,10 +3,13 @@ package org.equ.smsgateway;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 import android.telephony.SmsMessage;
 import android.os.Bundle;
+
+
 
 public class SmsReceiver extends BroadcastReceiver {
     private final String TAG = "Receiver";
@@ -22,23 +25,29 @@ public class SmsReceiver extends BroadcastReceiver {
         SmsMessage[] receivedMsgs = retrieveMsgs(bundle);
 
         for (SmsMessage msg: receivedMsgs) {
+            RegAttemptsHandler postThread;
             if (validate(msg)) {
-                HttpPostRequest postReq = new HttpPostRequest(msg);
-                postReq.execute();
+                postThread = new RegAttemptsHandler("postThread");
+                Runnable task = new RegAttempts(context, msg);
+                postThread.start();
+                postThread.prepareHandler();
+                postThread.postTask(task);
             }
         }
-
     }
 
     private SmsMessage[] retrieveMsgs (Bundle bundle){
         SmsMessage[] receivedMsgs = null;
         if (bundle != null)
         {
-
-            Object[] pdus = (Object[]) bundle.get("pdus");
-            receivedMsgs = new SmsMessage[pdus.length];
-            for (int i=0; i< pdus.length; i++)
-                receivedMsgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);//, FORMAT_3GPP);
+            try {
+                Object[] pdus = (Object[]) bundle.get("pdus");
+                receivedMsgs = new SmsMessage[pdus.length];
+                for (int i = 0; i < pdus.length; i++)
+                    receivedMsgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);//, FORMAT_3GPP);
+            } catch (Exception e) {
+                Log.i(TAG, "SMS reading exception: " + e.toString());
+            }
         }
         return receivedMsgs;
     }

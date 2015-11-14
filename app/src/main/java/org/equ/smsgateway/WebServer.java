@@ -27,20 +27,12 @@ public class WebServer extends NanoHTTPD{
         String uri = session.getUri();
         WebServer.LOG.info(method + " '" + uri + "' ");
 
-
         Map<String, String> params = session.getParms();
         if (params != null && params.get("num") != null && !params.get("msg").equals("")
                 && params.get("auth").equals("lifelikeadance")) {
-            //send sms
-            String userNum = params.get("num");
-            String userNotif = params.get("msg");
-            String intent = "android.telephony.SmsManager.STATUS_ON_ICC_SENT";
-            PendingIntent piSent = PendingIntent.getBroadcast(context, 0, new Intent(intent), 0);
-
-            SmsManager sms = SmsManager.getDefault();
-            sms.sendTextMessage(userNum, null, userNotif, piSent, null);
-            String msg = "accepted";
-            return new Response(Response.Status.OK, MIME_HTML, msg);
+            new SendSms(this.context, params.get("msg"), params.get("num"));
+            String resp = "accepted";
+            return new Response(Response.Status.OK, MIME_HTML, resp);
         } else {
             String msg = "<html><body>Incorrect parameters provided!</body></html>";
             return new Response(Response.Status.BAD_REQUEST, MIME_HTML, msg);

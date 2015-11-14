@@ -28,8 +28,6 @@ public class MainActivity extends Activity {
 //    private static final String SEND_SMS_INTENT = "org.equ.send_sms";
     private static final String HTTPD_SERVER_TAG = "Httpd";
     private static final int PORT = 6717;
-/*    private final IntentFilter intentFilter = new IntentFilter(SEND_SMS_INTENT);
-    private final QueuePositionReceiver receiver = new QueuePositionReceiver();*/
 
     private LocalBroadcastManager mBroadcastMgr;  //TEMP
     private WebServer server;
