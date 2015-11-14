@@ -23,6 +23,7 @@ public class RegAttempts implements Runnable {
     private final int REQ_TIMEOUT = 5000;
     private final String FAIL_TO_POST = "Queue is not accessible";
     private final String TAG = "POST";
+    private final String PAID_CONST = "1";
     Boolean success = false;
     Context context;
     SmsMessage msg;
@@ -46,6 +47,7 @@ public class RegAttempts implements Runnable {
         params.add(new BasicNameValuePair("sn", Globals.thisPhoneNum));
         params.add(new BasicNameValuePair("num", Integer.toString(msg.getIndexOnIcc())));
         params.add(new BasicNameValuePair("msg", msg.getMessageBody()));
+        params.add(new BasicNameValuePair("paid", PAID_CONST));
         request.getParams().setParameter("http.connection.timeout", REQ_TIMEOUT);
         request.getParams().setParameter("http.socket.timeout", REQ_TIMEOUT);
         try {
@@ -65,6 +67,7 @@ public class RegAttempts implements Runnable {
 
                     if (responsePOST.getStatusLine().getStatusCode() == STATUS_OK) {
                         success = true;
+                        new SendSms(context, responsePOST.getEntity().getContent().toString(), origAddr);
                         Log.i(TAG, "RESPONSE on Try #: " + tries++ + "was successful");
                     } else {
                         Log.i(TAG, "Try #: " + tries++ + "failed");
@@ -76,8 +79,9 @@ public class RegAttempts implements Runnable {
                 }
             }
 
-//        if ((withError || !success) && (origAddr != Globals.thisPhoneNum))
-//            new SendSms(context, FAIL_TO_POST, origAddr);
+        if ((withError || !success) && (origAddr != Globals.thisPhoneNum)
+                 && msg.getMessageBody() != FAIL_TO_POST)
+            new SendSms(context, FAIL_TO_POST, origAddr);
     }
 }
 
