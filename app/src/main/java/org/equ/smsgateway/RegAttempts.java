@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegAttempts implements Runnable {
-    private final int TRIES_LIMIT = 30;
+    private final int TRIES_LIMIT = 20;
     private final int TRIES_INTERVAL = 10000;
     private final int STATUS_OK = 200;
     private final int REQ_TIMEOUT = 5000;
@@ -80,7 +80,7 @@ public class RegAttempts implements Runnable {
             }
 
         if ((withError || !success) && (origAddr != Globals.thisPhoneNum)
-                 && msg.getMessageBody() != FAIL_TO_POST)
+                 && !msg.getMessageBody().equals(FAIL_TO_POST))
             new SendSms(context, FAIL_TO_POST, origAddr);
     }
 }

@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -32,10 +33,16 @@ public class MainActivity extends Activity {
     private LocalBroadcastManager mBroadcastMgr;  //TEMP
     private WebServer server;
     private Context context;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyWakelockTag");
+        wakeLock.acquire();
+
         context = getApplicationContext();
         setContentView(R.layout.activity_main);
 
@@ -118,7 +125,7 @@ public class MainActivity extends Activity {
         regServerPort.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
-                    Globals.regServerPort = regServerPort.getText().toString();
+                Globals.regServerPort = regServerPort.getText().toString();
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -126,23 +133,23 @@ public class MainActivity extends Activity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
-        server = new WebServer(context, PORT);
-        try {
-            server.start();
-        }
-        catch(IOException ioe) {
-            Log.w(HTTPD_SERVER_TAG, "The server could not start.");
-        }
-        Log.w(HTTPD_SERVER_TAG, "Web server initialized.");
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // registerReceiver(receiver, intentFilter);  //TODO
+        if (server == null) {
+            server = new WebServer(context, PORT);
+            try {
+                server.start();
+            } catch (IOException e) {
+                Log.w(HTTPD_SERVER_TAG, "The server could not start." + e);
+            }
+            Log.w(HTTPD_SERVER_TAG, "Web server initialized.");
+            // registerReceiver(receiver, intentFilter);  //TODO
 
-        //getting this phone SIMnumber
+            //getting this phone SIMnumber
+        }
 
     }
 
@@ -150,6 +157,7 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
 //        mBroadcastMgr.unregisterReceiver(receiver);
         if (server != null) server.stop();
+        wakeLock.release();
         super.onDestroy();
     }
 
