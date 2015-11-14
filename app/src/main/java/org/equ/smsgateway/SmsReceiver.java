@@ -44,8 +44,8 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private boolean validate(SmsMessage msg){
-        if (msg!= null && msg.getOriginatingAddress() != null
-                && msg.getMessageBody().matches("[0-9]+"))
+        if (msg!= null && msg.getOriginatingAddress() != null)
+//                && msg.getMessageBody().matches("[0-9]+"))
             return true;
         return false;
     }
