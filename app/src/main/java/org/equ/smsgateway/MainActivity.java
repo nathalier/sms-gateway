@@ -30,7 +30,6 @@ public class MainActivity extends Activity {
     private static final String HTTPD_SERVER_TAG = "Httpd";
     private static final int PORT = 6717;
 
-    private LocalBroadcastManager mBroadcastMgr;  //TEMP
     private WebServer server;
     private Context context;
     private PowerManager.WakeLock wakeLock;
@@ -161,13 +160,13 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        // TODO:
-        // Save state information with a collection of key-value pairs
-        // 4 lines of code, one for every count variable
-        savedInstanceState.putString("simNum", Globals.thisPhoneNum);
-
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState) {
+//        // TODO:
+//        // Save state information with a collection of key-value pairs
+//        // 4 lines of code, one for every count variable
+//        savedInstanceState.putString("simNum", Globals.thisPhoneNum);
+//
+//    }
 
 }
