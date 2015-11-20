@@ -67,10 +67,14 @@ public class RegAttempts implements Runnable {
 
                     if (responsePOST.getStatusLine().getStatusCode() == STATUS_OK) {
                         success = true;
-                        new SendSms(context, responsePOST.getEntity().getContent().toString(), origAddr);
-                        Log.i(TAG, "RESPONSE on Try #: " + tries++ + "was successful");
+                        Log.i(TAG, "RESPONSE on Try #: " + tries++ + " was successful");
+                        String responseText = responsePOST.getEntity().getContent().toString();
+                        if (!responseText.equals("")) {
+                            new SendSms(context, responseText, origAddr);
+                            Log.i(TAG, "SMS with response was sent");
+                        }
                     } else {
-                        Log.i(TAG, "Try #: " + tries++ + "failed");
+                        Log.i(TAG, "Try #: " + tries++ + " failed");
                     }
                 }
                 catch (Exception e) {
@@ -80,8 +84,10 @@ public class RegAttempts implements Runnable {
             }
 
         if ((withError || !success) && (origAddr != Globals.thisPhoneNum)
-                 && !msg.getMessageBody().equals(FAIL_TO_POST))
+                 && !msg.getMessageBody().equals(FAIL_TO_POST)) {
             new SendSms(context, FAIL_TO_POST, origAddr);
+            Log.i(TAG, "FAIL_TO_QUEUE SMS was sent");
+        }
     }
 }
 

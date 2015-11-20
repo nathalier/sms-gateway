@@ -1,34 +1,23 @@
 package org.equ.smsgateway;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.net.wifi.WifiManager;
 
 
 public class MainActivity extends Activity {
-//    private static final String SEND_SMS_INTENT = "org.equ.send_sms";
     private static final String HTTPD_SERVER_TAG = "Httpd";
-    private static final int PORT = 6717;
+    private static final int THIS_PHONE_PORT = 6717;
 
     private WebServer server;
     private Context context;
@@ -47,16 +36,8 @@ public class MainActivity extends Activity {
 
         /*mBroadcastMgr = LocalBroadcastManager                   //TEMP
                 .getInstance(context);
-        mBroadcastMgr.registerReceiver(receiver, intentFilter); //TEMP
+        mBroadcastMgr.registerReceiver(receiver, intentFilter); //TEMP*/
 
-
-        Button button = (Button) findViewById(R.id.button);     //TEMP
-        button.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBroadcastMgr.sendBroadcast(new Intent(SEND_SMS_INTENT));
-            }
-        });*/
         if (savedInstanceState == null) {
             TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             String mySimNum = telephMng.getLine1Number();
@@ -85,7 +66,7 @@ public class MainActivity extends Activity {
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
 
-        final String formatedIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
+        String formatedIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
                 (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
 
         // Getting device IP
@@ -104,7 +85,7 @@ public class MainActivity extends Activity {
             // Log.e(Constants.LOG_TAG, e.getMessage(), e);
         }*/
 
-        textIpaddr.setText("Please access http://" + formatedIpAddress + ":" + PORT);
+        textIpaddr.setText("Please access http://" + formatedIpAddress + ":" + THIS_PHONE_PORT);
 
         final EditText regServerHost = (EditText) findViewById(R.id.editTextRegServerHostValue);
         regServerHost.setText(Globals.regServerHost);
@@ -138,7 +119,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (server == null) {
-            server = new WebServer(context, PORT);
+            server = new WebServer(context, THIS_PHONE_PORT);
             try {
                 server.start();
             } catch (IOException e) {
@@ -160,13 +141,5 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-//    @Override
-//    public void onSaveInstanceState(Bundle savedInstanceState) {
-//        // TODO:
-//        // Save state information with a collection of key-value pairs
-//        // 4 lines of code, one for every count variable
-//        savedInstanceState.putString("simNum", Globals.thisPhoneNum);
-//
-//    }
 
 }
