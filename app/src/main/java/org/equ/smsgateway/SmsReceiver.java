@@ -14,6 +14,8 @@ import android.os.Bundle;
 public class SmsReceiver extends BroadcastReceiver {
     private final String TAG = "Receiver";
     private final String FORMAT_3GPP = "3gpp";
+    private String lastSmsText = "";
+    private String lastSmsSender = "";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -26,12 +28,14 @@ public class SmsReceiver extends BroadcastReceiver {
 
         for (SmsMessage msg: receivedMsgs) {
             RegAttemptsHandler postThread;
-            if (validate(msg)) {
+            if (validate(msg) && !isDuplicate(msg)) {
                 postThread = new RegAttemptsHandler("postThread");
                 Runnable task = new RegAttempts(context, msg);
                 postThread.start();
                 postThread.prepareHandler();
                 postThread.postTask(task);
+                lastSmsSender = msg.getOriginatingAddress();
+                lastSmsText = msg.getMessageBody();
             }
         }
     }
@@ -53,8 +57,16 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private boolean validate(SmsMessage msg){
-        if (msg!= null && msg.getOriginatingAddress() != null)
+        if (msg!= null && msg.getOriginatingAddress() != null
+                && msg.getOriginatingAddress().matches("^+?[0-9]+$"))
 //                && msg.getMessageBody().matches("[0-9]+"))
+            return true;
+        return false;
+    }
+
+    private boolean isDuplicate (SmsMessage msg) {
+        if (msg.getOriginatingAddress().equals(lastSmsSender)
+                && msg.getMessageBody().equals(lastSmsText))
             return true;
         return false;
     }

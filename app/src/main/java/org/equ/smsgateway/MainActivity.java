@@ -3,7 +3,9 @@ package org.equ.smsgateway;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
@@ -22,6 +24,7 @@ public class MainActivity extends Activity {
     private WebServer server;
     private Context context;
     private PowerManager.WakeLock wakeLock;
+    private ComponentName receiverComp;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,10 @@ public class MainActivity extends Activity {
         /*mBroadcastMgr = LocalBroadcastManager                   //TEMP
                 .getInstance(context);
         mBroadcastMgr.registerReceiver(receiver, intentFilter); //TEMP*/
+
+        receiverComp = new ComponentName(context, SmsReceiver.class);
+        context.getPackageManager().setComponentEnabledSetting(receiverComp,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
 
         if (savedInstanceState == null) {
             TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -138,7 +145,10 @@ public class MainActivity extends Activity {
 //        mBroadcastMgr.unregisterReceiver(receiver);
         if (server != null) server.stop();
         wakeLock.release();
+        context.getPackageManager().setComponentEnabledSetting(receiverComp,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
         super.onDestroy();
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
 
