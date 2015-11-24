@@ -3,7 +3,6 @@ package org.equ.smsgateway;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 import android.telephony.SmsMessage;
@@ -57,8 +56,9 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private boolean validate(SmsMessage msg){
-        if (msg!= null && msg.getOriginatingAddress() != null
-                && msg.getOriginatingAddress().matches("^+?[0-9]+$"))
+        if (msg!= null
+                && msg.getOriginatingAddress() != null
+                && msg.getOriginatingAddress().matches("^\\+?[0-9]+$"))
 //                && msg.getMessageBody().matches("[0-9]+"))
             return true;
         return false;

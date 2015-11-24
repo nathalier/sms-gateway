@@ -19,6 +19,7 @@ import android.net.wifi.WifiManager;
 
 public class MainActivity extends Activity {
     private static final String HTTPD_SERVER_TAG = "Httpd";
+    private static final String PKGMNG_TAG = "PkgMng";
     private static final int THIS_PHONE_PORT = 6717;
 
     private WebServer server;
@@ -43,7 +44,7 @@ public class MainActivity extends Activity {
 
         receiverComp = new ComponentName(context, SmsReceiver.class);
         context.getPackageManager().setComponentEnabledSetting(receiverComp,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 
         if (savedInstanceState == null) {
             TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -53,7 +54,6 @@ public class MainActivity extends Activity {
         }
 
         final EditText mySimNumET = (EditText) findViewById(R.id.editTextThisTelephNum);
-//        TextView mySimNumTV = (TextView) findViewById(R.id.textViewThisSimNumValue);
         mySimNumET.setText(Globals.thisPhoneNum);
         mySimNumET.addTextChangedListener(new TextWatcher() {
 
@@ -69,6 +69,7 @@ public class MainActivity extends Activity {
         });
 
         TextView textIpaddr = (TextView) findViewById(R.id.ipaddr);
+
         // Getting WiFi device IP
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
@@ -145,10 +146,13 @@ public class MainActivity extends Activity {
 //        mBroadcastMgr.unregisterReceiver(receiver);
         if (server != null) server.stop();
         wakeLock.release();
+        try {
         context.getPackageManager().setComponentEnabledSetting(receiverComp,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        } catch (Exception e) {
+            Log.w(PKGMNG_TAG, e);
+        }
         super.onDestroy();
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
 
