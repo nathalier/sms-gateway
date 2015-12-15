@@ -15,16 +15,20 @@ public class SmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+//        is called when intent (new sms in this case) received
         Log.i(TAG, "INTENT RECEIVED by SmsReceiver");
 
         Toast.makeText(context, "SMS RECEIVED by SmsReceiver", Toast.LENGTH_LONG).show();
 
+//        transformation sms data to a list of SmsMessage
+//        usually it contains only one sms
         Bundle bundle = intent.getExtras();
         SmsMessage[] receivedMsgs = retrieveMsgs(bundle);
 
         for (SmsMessage msg: receivedMsgs) {
-            RegAttemptsHandler postThread;
             if (validate(msg)) {
+//                starting background process to send request to registration server
+                RegAttemptsHandler postThread;
                 postThread = new RegAttemptsHandler("postThread");
                 Runnable task = new RegAttempts(context, msg);
                 postThread.start();

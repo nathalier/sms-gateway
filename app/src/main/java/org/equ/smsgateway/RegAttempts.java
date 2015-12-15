@@ -18,9 +18,9 @@ import java.util.List;
 
 public class RegAttempts implements Runnable {
     private final int TRIES_LIMIT = 20;
-    private final int TRIES_INTERVAL = 10000;
+    private final int TRIES_INTERVAL = 10000; // ms
     private final int STATUS_OK = 200;
-    private final int REQ_TIMEOUT = 5000;
+    private final int REQ_TIMEOUT = 5000; // ms
     private final String FAIL_TO_POST = "Queue is not accessible";
     private final String TAG = "POST";
     private final String PAID_CONST = "1";
@@ -38,7 +38,10 @@ public class RegAttempts implements Runnable {
 
     @Override
     public void run() {
+//        gets sender cell num
         String origAddr = msg.getOriginatingAddress();
+
+//        POST-request construction
         HttpClient httpClient = new DefaultHttpClient();
         HttpPost request = new HttpPost("http://" + Globals.regServerHost + ":"
                 + Globals.regServerPort);
@@ -59,6 +62,7 @@ public class RegAttempts implements Runnable {
             Log.i(TAG, "POST exception: " + e.toString());
             withError = true;
         }
+//       iterated request sending until success or tries limit
         if (!withError)
             while (!success && tries <= TRIES_LIMIT) {
                 try {
@@ -69,6 +73,8 @@ public class RegAttempts implements Runnable {
                         success = true;
                         Log.i(TAG, "RESPONSE on Try #: " + tries++ + " was successful");
                         String responseText = responsePOST.getEntity().getContent().toString();
+
+//                        sends sms to client if OK-response contains text for him
                         if (!responseText.equals("")) {
                             new SendSms(context, responseText, origAddr);
                             Log.i(TAG, "SMS with response was sent");
@@ -83,8 +89,14 @@ public class RegAttempts implements Runnable {
                 }
             }
 
-        if ((withError || !success) && (origAddr != Globals.thisPhoneNum)
-                 && !msg.getMessageBody().equals(FAIL_TO_POST)) {
+        if ((withError || !success) &&
+                // further expression could be useful for testing purpose.
+                // It prevents sending FAIL_TO_POST sms to itself,
+                // but does not protect 2-sim device with another server response
+                // from infinite sms sending and receiving:-)
+                !origAddr.equals(Globals.thisPhoneNum) &&
+                !msg.getMessageBody().equals(FAIL_TO_POST)) {
+            //  sends FAIL_TO_POST sms to client
             new SendSms(context, FAIL_TO_POST, origAddr);
             Log.i(TAG, "FAIL_TO_QUEUE SMS was sent");
         }

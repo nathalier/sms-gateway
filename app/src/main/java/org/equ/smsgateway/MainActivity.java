@@ -30,22 +30,23 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        prevent phone from sleep and web-server stop
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyWakelockTag");
         wakeLock.acquire();
 
+//        setting UI elements
         context = getApplicationContext();
         setContentView(R.layout.activity_main);
 
-        /*mBroadcastMgr = LocalBroadcastManager                   //TEMP
-                .getInstance(context);
-        mBroadcastMgr.registerReceiver(receiver, intentFilter); //TEMP*/
-
+//        enabling smsRececiver BroadcastReceiver
         receiverComp = new ComponentName(context, SmsReceiver.class);
         context.getPackageManager().setComponentEnabledSetting(receiverComp,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 
+//        getting the phone number
         if (savedInstanceState == null) {
             TelephonyManager telephMng = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             String mySimNum = telephMng.getLine1Number();
@@ -53,6 +54,7 @@ public class MainActivity extends Activity {
                 Globals.thisPhoneNum = mySimNum;
         }
 
+//        setting listener for changing the phone number when it's defined incorrectly
         final EditText mySimNumET = (EditText) findViewById(R.id.editTextThisTelephNum);
         mySimNumET.setText(Globals.thisPhoneNum);
         mySimNumET.addTextChangedListener(new TextWatcher() {
@@ -68,6 +70,7 @@ public class MainActivity extends Activity {
             }
         });
 
+//        defining current Wi-Fi IP-address and displaying it in ipaddr TextView
         TextView textIpaddr = (TextView) findViewById(R.id.ipaddr);
 
         // Getting WiFi device IP
@@ -77,24 +80,10 @@ public class MainActivity extends Activity {
         String formatedIpAddress = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
                 (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
 
-        // Getting device IP
-        /*final String formatedIpAddress = "0000";
-        try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
-                NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
-                    InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        formatedIpAddress = inetAddress.getHostAddress();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            // Log.e(Constants.LOG_TAG, e.getMessage(), e);
-        }*/
-
+//        displaying WiFI IP-address in ipaddr TextView
         textIpaddr.setText("Please access http://" + formatedIpAddress + ":" + THIS_PHONE_PORT);
 
+//        setting listener for chnaging Registration server host
         final EditText regServerHost = (EditText) findViewById(R.id.editTextRegServerHostValue);
         regServerHost.setText(Globals.regServerHost);
         regServerHost.addTextChangedListener(new TextWatcher() {
@@ -108,6 +97,7 @@ public class MainActivity extends Activity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
+        //        setting listener for chnaging Registration server port
         final EditText regServerPort = (EditText) findViewById(R.id.editTextRegServerPortValue);
         regServerPort.setText(Globals.regServerPort);
         regServerPort.addTextChangedListener(new TextWatcher() {
@@ -126,6 +116,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+
+//        Starting the webserver on the phone to get requests from Registration Server
         if (server == null) {
             server = new WebServer(context, THIS_PHONE_PORT);
             try {
@@ -134,24 +126,26 @@ public class MainActivity extends Activity {
                 Log.w(HTTPD_SERVER_TAG, "The server could not start." + e);
             }
             Log.w(HTTPD_SERVER_TAG, "Web server initialized.");
-            // registerReceiver(receiver, intentFilter);  //TODO
-
-            //getting this phone SIMnumber
         }
 
     }
 
     @Override
     protected void onDestroy() {
-//        mBroadcastMgr.unregisterReceiver(receiver);
+//        stop Web-server
         if (server != null) server.stop();
+
+//        allow phone to sleep
         wakeLock.release();
+
+//        disabling smsReceiver BroadcastReceiver
         try {
         context.getPackageManager().setComponentEnabledSetting(receiverComp,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
         } catch (Exception e) {
             Log.w(PKGMNG_TAG, e);
         }
+
         super.onDestroy();
     }
 
